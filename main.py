@@ -9,6 +9,23 @@ class Ball:
         self.vx= random.uniform(-300, 300)
         self.vy= random.uniform(-200, 0)
 
+
+class Button:
+    def __init__(self, x, y, w, h, text):
+        self.rect = pygame.Rect(x, y, w, h)
+        self.text = text
+
+    def draw(self, screen, font):
+        pygame.draw.rect(screen, (100,100,100), self.rect)
+        pygame.draw.rect(screen, (255,255,255), self.rect, 2)
+
+        txt = font.render(self.text, True, (255,255,255))
+        screen.blit(txt, (self.rect.x + 10, self.rect.y + 5))
+
+    def is_clicked(self, event):
+        return event.type == pygame.MOUSEBUTTONDOWN and self.rect.collidepoint(event.pos)
+    
+
 class Slider:
     def __init__(self, x, y, width, min_val, max_val, start_val):
         self.x = x
@@ -50,6 +67,7 @@ balls = []
 no_of_balls = 10
 radius = 10
 
+reset_button = Button(650, 20, 120, 40, "Reset")
 gravity_slider = Slider(50, 550, 200, 0, 500, acceleration)
 bounce_slider = Slider(300, 550, 200, 0, 1, bounce_factor)
 speed_slider = Slider(550, 550, 200, 0.1, 3, simulation_speed)
@@ -73,6 +91,18 @@ clock = pygame.time.Clock()
 screen = pygame.display.set_mode((800, 600))
 pygame.display.set_caption("My Game Window")
 
+def reset_simulation():
+    global balls
+
+    balls = []
+    for _ in range(no_of_balls):
+        balls.append({
+            "x": random.randint(150, 650),
+            "y": random.randint(150, 450),
+            "vx": random.uniform(-300, 300),
+            "vy": random.uniform(-200, 0),
+            "color":(random.randint(0,255),random.randint(0,255),random.randint(0,255))
+        })
 # game loop
 running = True
 while running:
@@ -82,6 +112,10 @@ while running:
 
     screen.fill((0, 0, 0))
     dt = (clock.tick(60) / 1000) * simulation_speed  # 60 FPS, dt in seconds
+
+    if reset_button.is_clicked(event):
+        reset_simulation()
+    
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
@@ -93,6 +127,7 @@ while running:
     acceleration = gravity_slider.value
     bounce_factor = bounce_slider.value
     simulation_speed = speed_slider.value
+
     # render text
     def render_text(elms)->None:
         keys = list(elms.keys())
@@ -141,10 +176,14 @@ while running:
     pygame.draw.line(screen,(255,255,255),(700,100),(700,500),2) # right
     pygame.draw.line(screen,(255,255,255),(100,100),(100,500),2) # left
 
+
+    reset_button.draw(screen, font)
     gravity_slider.draw(screen)
     bounce_slider.draw(screen)
     speed_slider.draw(screen)
-    
+    screen.blit(font.render(f"Gravity:{acceleration}", True, (255,255,255)), (50, 520))
+    screen.blit(font.render(f"Bounce:{bounce_factor}", True, (255,255,255)), (300, 520))
+    screen.blit(font.render(f"Speed:{simulation_speed:.2f}", True, (255,255,255)), (550, 520))
     pygame.display.update()  # refresh screen
 
 pygame.quit()
