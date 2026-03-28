@@ -10,7 +10,9 @@ def dot_product(a1,a2):
         raise "dot prod err: array length does not match"
     return [a1[i] * a2[i] for i in range(len(a1))]
 
-
+simulation_speed = 1 # default 1
+acceleration = 100
+bounce_factor = 0.8 # {0 : no bounce, 1 : perfect bounce} 
 balls = []
 no_of_balls = 1
 radius = 10
@@ -28,8 +30,7 @@ for _ in range(no_of_balls):
 # vx = random.uniform(-300, 300)
 # vy = random.uniform(-200, 0)
 
-acceleration = 0
-bounce_factor = 1
+
 
 font = pygame.font.SysFont(None, 30)
 clock = pygame.time.Clock()
@@ -47,7 +48,6 @@ while running:
             running = False
 
     screen.fill((0, 0, 0))
-    simulation_speed = 1
     dt = (clock.tick(60) / 1000) * simulation_speed  # 60 FPS, dt in seconds
 
     # render text
@@ -85,7 +85,7 @@ while running:
     
     for ball in balls:
         #pygame.draw.circle(screen,(color(RGB)), (coords), size of the circle)
-        pygame.draw.circle(screen, (255,255,255), (int(ball["x"]), int(ball["y"])), radius)
+        pygame.draw.circle(screen, (random.uniform(0,255),random.uniform(0,255),random.uniform(0,255)), (int(ball["x"]), int(ball["y"])), radius)
 
     pygame.draw.line(screen,(255,255,255),(100,100),(700,100),2) # top
     pygame.draw.line(screen,(255,255,255),(100,500),(700,500),2) # bottom
