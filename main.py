@@ -8,7 +8,8 @@ class Ball:
         self.y= random.randint(150, 450)
         self.vx= random.uniform(-300, 300)
         self.vy= random.uniform(-200, 0)
-        self.color = (random.randint(0,255),random.randint(0,255),random.randint(0,255))
+        self.color = (50,70,200)
+        # self.color = (random.randint(0,255),random.randint(0,255),random.randint(0,255))
 
 # this is a reset button
 class Button:
@@ -70,8 +71,8 @@ class Slider:
 
 
 simulation_speed = 1 # default 1
-acceleration = 00
-bounce_factor = 0.8 # {0 : no bounce, 1 : perfect bounce} 
+acceleration = 50    # gravity
+bounce_factor = 0.8  # {0 : no bounce, 1 : perfect bounce} 
 radius = 10
 
 reset_button = Button(650, 20, 120, 40, "Reset")
@@ -79,7 +80,7 @@ gravity_slider = Slider(50, 550, 200, 0, 500, acceleration)
 bounce_slider = Slider(300, 550, 200, 0, 1, bounce_factor)
 speed_slider = Slider(550, 550, 200, 0.1, 3, simulation_speed)
 
-no_of_balls = 1
+no_of_balls = 5
 balls = []*no_of_balls
 
 for _ in range(no_of_balls):
@@ -117,17 +118,6 @@ while running:
     screen.fill((0, 0, 0))
     dt = (clock.tick(60) / 1000) * simulation_speed  # 60 FPS, dt in seconds
 
-    # if reset_button.is_clicked(event):
-    #     reset_simulation()
-    
-    # for event in pygame.event.get():
-    #     if event.type == pygame.QUIT:
-    #         running = False
-
-    #     gravity_slider.update(event)
-    #     bounce_slider.update(event)
-    #     speed_slider.update(event)
-
     acceleration = gravity_slider.value
     bounce_factor = bounce_slider.value
     simulation_speed = speed_slider.value
@@ -163,7 +153,29 @@ while running:
         if ball.y >= 500 - radius: # right
             ball.y = 500 - radius
             ball.vy = -ball.vy * bounce_factor
-    
+    for i in range(len(balls)):
+        for j in range(i+1, len(balls)):
+            b1 = balls[i]
+            b2 = balls[j]
+
+            dx = b1.x - b2.x
+            dy = b1.y - b2.y
+            dist = (dx**2 + dy**2)**0.5
+            
+            if dist == 0:
+                continue
+
+            if dist < 2 * radius:
+                # push apart (important)
+                overlap = 2 * radius - dist
+                b1.x += dx / dist * overlap / 2
+                b1.y += dy / dist * overlap / 2
+                b2.x -= dx / dist * overlap / 2
+                b2.y -= dy / dist * overlap / 2
+
+                # swap velocities
+                b1.vx, b2.vx = b2.vx, b1.vx
+                b1.vy, b2.vy = b2.vy, b1.vy
     for ball in balls:
         #pygame.draw.circle(screen,(color(RGB)), (coords), size of the circle)
         pygame.draw.circle(screen, ball.color, (int(ball.x), int(ball.y)), radius)
