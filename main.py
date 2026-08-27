@@ -9,6 +9,8 @@ class Ball:
         self.vx= random.uniform(-300, 300)
         self.vy= random.uniform(-200, 0)
         self.color = (50,70,200)
+        self.mass = 1
+        self. radius = 1
         # self.color = (random.randint(0,255),random.randint(0,255),random.randint(0,255))
 
 # this is a reset button
@@ -73,15 +75,15 @@ class Slider:
 simulation_speed = 1 # default 1
 acceleration = 50    # gravity
 bounce_factor = 0.8  # {0 : no bounce, 1 : perfect bounce} 
-radius = 10
+radius = 2
+
+no_of_balls = 500
+balls = []*no_of_balls
 
 reset_button = Button(650, 20, 120, 40, "Reset")
 gravity_slider = Slider(50, 550, 200, 0, 500, acceleration)
 bounce_slider = Slider(300, 550, 200, 0, 1, bounce_factor)
 speed_slider = Slider(550, 550, 200, 0.1, 3, simulation_speed)
-
-no_of_balls = 5
-balls = []*no_of_balls
 
 for _ in range(no_of_balls):
     balls.append(Ball())
@@ -153,16 +155,22 @@ while running:
         if ball.y >= 500 - radius: # right
             ball.y = 500 - radius
             ball.vy = -ball.vy * bounce_factor
+            
+    # adding collison among balls :)        
     for i in range(len(balls)):
         for j in range(i+1, len(balls)):
             b1 = balls[i]
             b2 = balls[j]
 
+            # distance between x coord of 2 balls
             dx = b1.x - b2.x
+            # distance between y coord of 2 balls
             dy = b1.y - b2.y
-            dist = (dx**2 + dy**2)**0.5
             
-            if dist == 0:
+            # using pythagorus theorm to find the distance between 2 balls
+            dist = (dx**2 + dy**2)**0.5
+
+            if dist == 0: # to avoid division by zero
                 continue
 
             if dist < 2 * radius:
@@ -176,16 +184,18 @@ while running:
                 # swap velocities
                 b1.vx, b2.vx = b2.vx, b1.vx
                 b1.vy, b2.vy = b2.vy, b1.vy
-    for ball in balls:
-        #pygame.draw.circle(screen,(color(RGB)), (coords), size of the circle)
-        pygame.draw.circle(screen, ball.color, (int(ball.x), int(ball.y)), radius)
 
-    # pygame.draw.line(screen,(0,255,0),(balls[0]["x"],balls[0]["y"]),(balls[1]["x"],balls[1]["y"]),1)
+    #pygame.draw.line(screen,(0,255,0),(balls[i].x,balls[i].y),(balls[j].x,balls[j].y),1)
     # for i in range(len(balls)):
     #     for j in range(i,len(balls)):
     #         if i!=j:
-    #             pygame.draw.line(screen,(0,255,0),(balls[i]["x"],balls[i]["y"]),(balls[j]["x"],balls[j]["y"]),1)
+    #             line_color = (0,0,200)
+    #             pygame.draw.line(screen,line_color,(balls[i].x,balls[i].y),(balls[j].x,balls[j].y),1)
                 
+    for ball in balls:
+        #pygame.draw.circle(screen,(color(RGB)), (coords), size of the circle)
+        pygame.draw.circle(screen, ball.color, (int(ball.x), int(ball.y)), radius)
+        
     pygame.draw.line(screen,(255,255,255),(100,100),(700,100),2) # top
     pygame.draw.line(screen,(255,255,255),(100,500),(700,500),2) # bottom
     pygame.draw.line(screen,(255,255,255),(700,100),(700,500),2) # right
