@@ -12,6 +12,20 @@ class Ball:
         self.mass = 1
         self. radius = 1
         # self.color = (random.randint(0,255),random.randint(0,255),random.randint(0,255))
+        
+    def update(self, dt, acceleration):
+        self.vy += acceleration * dt
+        self.x += self.vx * dt
+        self.y += self.vy * dt
+    
+    def draw(self, screen):
+        pygame.draw.circle(
+            screen,
+            self.color,
+            (int(self.x), int(self.y)),
+            radius
+        )
+    
 
 # this is a reset button
 class Button:
@@ -103,6 +117,10 @@ def reset_simulation():
     balls = []
     for _ in range(no_of_balls):
         balls.append(Ball())
+        
+cell_size = radius * 2
+grid = {}
+
 # game loop
 running = True
 while running:
@@ -133,12 +151,12 @@ while running:
     render_info = {"X":balls[0].x,"Y":balls[0].y,"velX":balls[0].vx,"velY":balls[0].vy}
     render_text(render_info)
 
-
+    # acceleration
     for ball in balls:
-        ball.vy += acceleration * dt # gravity
-        ball.x += ball.vx * dt
-        ball.y += ball.vy * dt
+        ball.update(dt, acceleration)
 
+    # bouncing mechanics 
+    # for now they are kind of pathetic as its not even line its just a complete axis
     for ball in balls:
         if ball.x <= 100 + radius: # top
             ball.x = 100 + radius
@@ -155,7 +173,7 @@ while running:
         if ball.y >= 500 - radius: # right
             ball.y = 500 - radius
             ball.vy = -ball.vy * bounce_factor
-            
+    '''        
     # adding collison among balls :)        
     for i in range(len(balls)):
         for j in range(i+1, len(balls)):
@@ -184,17 +202,48 @@ while running:
                 # swap velocities
                 b1.vx, b2.vx = b2.vx, b1.vx
                 b1.vy, b2.vy = b2.vy, b1.vy
+    '''
+    for cell, cell_balls in grid.items():
 
+        cell_x, cell_y = cell
+
+        for b1 in cell_balls:
+
+            for offset_x in [-1, 0, 1]:
+                for offset_y in [-1, 0, 1]:
+
+                    nearby_cell = (cell_x + offset_x, cell_y + offset_y)
+
+                    if nearby_cell not in grid:
+                        continue
+
+                    for b2 in grid[nearby_cell]:
+
+                        if b1 == b2:
+                            continue
+
+                    # collision calculation here
     #pygame.draw.line(screen,(0,255,0),(balls[i].x,balls[i].y),(balls[j].x,balls[j].y),1)
     # for i in range(len(balls)):
     #     for j in range(i,len(balls)):
     #         if i!=j:
     #             line_color = (0,0,200)
     #             pygame.draw.line(screen,line_color,(balls[i].x,balls[i].y),(balls[j].x,balls[j].y),1)
-                
+    grid = {}
+
     for ball in balls:
-        #pygame.draw.circle(screen,(color(RGB)), (coords), size of the circle)
-        pygame.draw.circle(screen, ball.color, (int(ball.x), int(ball.y)), radius)
+        cell_x = int(ball.x / cell_size)
+        cell_y = int(ball.y / cell_size)
+
+        cell = (cell_x, cell_y)
+
+        if cell not in grid:
+            grid[cell] = []
+
+        grid[cell].append(ball)
+    # rendering the balls
+    for ball in balls:
+        ball.draw(screen)
         
     pygame.draw.line(screen,(255,255,255),(100,100),(700,100),2) # top
     pygame.draw.line(screen,(255,255,255),(100,500),(700,500),2) # bottom
